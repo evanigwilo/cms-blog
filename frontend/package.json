@@ -1,0 +1,60 @@
+{
+  "name": "cms-blog-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/plugin-syntax-flow": "^7.14.5",
+    "@babel/plugin-transform-react-jsx": "^7.14.9",
+    "@hookform/resolvers": "^2.9.9",
+    "@styled-icons/bootstrap": "^10.46.0",
+    "@types/node": "^16.7.13",
+    "@types/react": "^17.0.20",
+    "@types/react-dom": "^17.0.9",
+    "axios": "^0.25.0",
+    "dayjs": "^1.10.7",
+    "numeral": "2.0.6",
+    "prop-types": "15.7.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-hook-form": "7.34.2",
+    "react-intersection-observer": "8.34.0",
+    "react-is": "16.8.0",
+    "react-router-dom": "^6.2.1",
+    "react-scripts": "5.0.0",
+    "styled-components": "5.3.5",
+    "typescript": "^4.4.2",
+    "web-vitals": "^2.1.0",
+    "yup": "^0.32.11"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/numeral": "2.0.2",
+    "@types/styled-components": "5.1.25"
+  },
+  "resolutions": {
+    "styled-components": "^5",
+    "@types/react": "^17.0.20"
+  }
+}
