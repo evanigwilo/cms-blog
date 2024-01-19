@@ -1,0 +1,568 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  title: 'CMS Blog API'
+  description: |
+    CMS Blog API based on the OpenAPI 3.0 specification.
+
+    Useful links:
+    - [CMS Blog API Repository](https://github.com/evanigwilo/cms-blog)
+    - [The API Definition](https://github.com/evanigwilo/cms-blog/blob/main/backend/docs/api-definition.yml)
+tags:
+  - name: User
+    description: Access to user related endpoints
+  - name: Post
+    description: Access to post related endpoints
+  - name: Image
+    description: Access to Image related endpoints
+
+paths:
+  # User
+  /user/authenticate:
+    post:
+      tags:
+        - User
+      description: This can only be done by an authenticated user.
+      summary: Gets user attributes for the current authenticated user
+      responses:
+        '200':
+          description: Returns user attributes
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'User authenticated.'
+                  user:
+                    _id: '65a9266c146d2ae5d5fa44ba'
+                    email: 'evan@email.com'
+                    username: 'evan'
+                    createdDate: '2023-11-04T18:39:57.114Z'
+                    updatedDate: '2023-11-04T18:39:57.114Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /user/register:
+    post:
+      tags:
+        - User
+      summary: Register and returns the authentication cookie
+      security: [] # no authentication
+      requestBody:
+        required: true
+        description: Sample register information.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                gender:
+                  type: string
+                username:
+                  type: string
+                password:
+                  type: string
+              example:
+                username: 'evan'
+                email: 'evan@email.com'
+                password: '123456'
+      responses:
+        '201':
+          description: |
+            Successfully registers user.
+
+            Returns user attributes and cookies that are to be included in subsequent requests.
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'User created successfully.'
+                  user:
+                    _id: '65a9266c146d2ae5d5fa44ba'
+                    email: 'evan@email.com'
+                    username: 'evan'
+                    createdDate: '2023-11-04T18:39:57.114Z'
+                    updatedDate: '2023-11-04T18:39:57.114Z'
+          headers:
+            Set-Cookie:
+              schema:
+                $ref: '#/components/schemas/SetCookie'
+        '400':
+          description: ''
+          content:
+            application/json:
+              examples:
+                Username or Email Exist:
+                  description: User with corresponding email or username already exists
+                  value:
+                    code: FORBIDDEN
+                    message: Username or Email already exist.
+                Email Invalid:
+                  description: Email is not supplied or is invalid
+                  value:
+                    code: INPUT_ERROR
+                    message: Email - Email is invalid.
+                Username Invalid:
+                  description: Username is not supplied or is invalid
+                  value:
+                    code: INPUT_ERROR
+                    message: Username - Username should contain only letters and numbers.
+  /user/login:
+    post:
+      tags:
+        - User
+      summary: Logs in and returns the authentication cookie
+      security: [] # no authentication
+      requestBody:
+        required: true
+        description: Sample login and password.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identity
+                - password
+              properties:
+                identity:
+                  type: string
+                password:
+                  type: string
+              example:
+                identity: 'evan'
+                password: '123456'
+      responses:
+        '200':
+          description: |
+            Successfully authenticated.
+
+            Returns user attributes and cookies that are to be included  in subsequent requests.
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'User login successfully.'
+                  user:
+                    _id: '65a9266c146d2ae5d5fa44ba'
+                    email: 'evan@email.com'
+                    username: 'evan'
+                    createdDate: '2023-11-04T18:39:57.114Z'
+                    updatedDate: '2023-11-04T18:39:57.114Z'
+          headers:
+            Set-Cookie:
+              schema:
+                $ref: '#/components/schemas/SetCookie'
+        '400':
+          description: ''
+          content:
+            application/json:
+              examples: # Multiple examples
+                Username or Email Does Not Exist:
+                  description: User with corresponding email or username does not exists
+                  value:
+                    code: INPUT_ERROR
+                    message: Username or Email doesn't exist.
+                Password Invalid:
+                  description: Password is not supplied or is invalid
+                  value:
+                    code: INPUT_ERROR
+                    message: Incorrect password.
+  /user/logout:
+    post:
+      tags:
+        - User
+      summary: Logs out and deletes the authenticated cookie
+      security: [] # no authentication
+      responses:
+        '204':
+          description: |
+            Successfully logged out and clears cookie.
+
+            Returns no content.
+          headers:
+            Set-Cookie:
+              # clears cookie
+              schema:
+                type: array
+                items:
+                  type: string
+                example: 'SESSION_ID=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  /user/update-bio:
+    post:
+      tags:
+        - User
+      summary: Updates users biography
+      requestBody:
+        required: true
+        description: Sample bio updated.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bio
+              properties:
+                bio:
+                  type: string
+              example:
+                bio: 'I love traveling'
+      responses:
+        '200':
+          description: |
+            Successfully updated.
+
+            Returns user attributes.
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'Bio updated successfully.'
+                  user:
+                    _id: '65a9266c146d2ae5d5fa44ba'
+                    email: 'evan@email.com'
+                    username: 'evan'
+                    createdDate: '2023-11-04T18:39:57.114Z'
+                    updatedDate: '2023-11-04T18:39:57.114Z'
+                    bio: 'I love traveling'
+  /user/{username}:
+    get:
+      tags:
+        - User
+      summary: Get a user by username
+      security: [] # no authentication
+      operationId: getUser
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '200':
+          description: Returns user with the specified username
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'User found'
+                  user:
+                    _id: '65a9266c146d2ae5d5fa44ba'
+                    email: 'evan@email.com'
+                    username: 'evan'
+                    createdDate: '2023-11-04T18:39:57.114Z'
+                    updatedDate: '2023-11-04T18:39:57.114Z'
+
+  # Post
+  /post:
+    post:
+      tags:
+        - Post
+      summary: Gets posts
+      security: [] # no authentication
+      requestBody:
+        $ref: '#/components/requestBodies/Pagination'
+      responses:
+        '200':
+          description: Returns posts
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 'SUCCESS'
+                  message: 'All Posts.'
+                  posts:
+                    - _id: '65aac34fe4310502479c59f2'
+                      body: 'post 1'
+                      image: false
+                      createdBy:
+                        _id: '65a9266c146d2ae5d5fa44ba'
+                        email: 'evan@email.com'
+                        username: 'evan'
+                      createdDate: '2024-01-19T18:45:35.962Z'
+                      updatedDate: '2024-01-19T18:45:35.962Z'
+                    - _id: '65aac349e4310502479c59d4'
+                      body: 'post 2'
+                      image: false
+                      createdBy:
+                        _id: '65a9266c146d2ae5d5fa44ba'
+                        email: 'evan@email.com'
+                        username: 'evan'
+                      createdDate: '2024-01-19T18:45:35.962Z'
+                      updatedDate: '2024-01-19T18:45:35.962Z'
+                    - _id: '65aac33ee4310502479c5952'
+                      body: 'post 3'
+                      image: true
+                      createdBy:
+                        _id: 65a9266c146d2ae5d5fa44ba
+                        email: john@gmail.com
+                        username: john
+                      createdDate: '2024-01-19T18:45:18.688Z'
+                      updatedDate: '2024-01-19T18:45:18.688Z'
+                  count: 3
+                  limit: 10
+                  offset: 0
+  /post/{username}:
+    post:
+      tags:
+        - Post
+      summary: Gets posts
+      security: [] # no authentication
+      requestBody:
+        $ref: '#/components/requestBodies/Pagination'
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '200':
+          description: Returns a users posts
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  code: 'SUCCESS'
+                  message: 'User Posts.'
+                  posts:
+                    - _id: '65aac34fe4310502479c59f2'
+                      body: 'post 1'
+                      image: false
+                      createdBy:
+                        _id: '65a9266c146d2ae5d5fa44ba'
+                        email: 'evan@email.com'
+                        username: 'evan'
+                      createdDate: '2024-01-19T18:45:35.962Z'
+                      updatedDate: '2024-01-19T18:45:35.962Z'
+                    - _id: '65aac349e4310502479c59d4'
+                      body: 'post 2'
+                      image: false
+                      createdBy:
+                        _id: '65a9266c146d2ae5d5fa44ba'
+                        email: 'evan@email.com'
+                        username: 'evan'
+                      createdDate: '2024-01-19T18:45:35.962Z'
+                      updatedDate: '2024-01-19T18:45:35.962Z'
+                  count: 2
+                  limit: 10
+                  offset: 0
+  /post/{postId}:
+    delete:
+      tags:
+        - Post
+      summary: Delete post by id
+      description: This can only be done by an authenticated user who created the post.
+      operationId: deletePost
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Post to delete was successful
+          content:
+            application/json:
+              example:
+                code: 'SUCCESS'
+                message: 'Post deleted successfully.'
+
+        '400':
+          description: Post to delete was not successful
+          content:
+            application/json:
+              example:
+                code: 'FORBIDDEN'
+                message: 'Post identifier invalid or User not authorized'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+  /post/create:
+    put:
+      tags:
+        - Post
+      summary: Creates a post
+      description: This can only be done by an authenticated user.
+      operationId: createPost
+      requestBody:
+        required: true
+        description: Post description
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - body
+              properties:
+                body:
+                  type: string
+              example:
+                body: 'My Post'
+      responses:
+        '201':
+          description: Post to create was successful
+          content:
+            application/json:
+              example:
+                code: 'SUCCESS'
+                message: 'Post created successfully'
+                post:
+                  _id: '65aac34fe4310502479c59f2'
+                  body: 'My Post'
+                  image: false
+                  createdBy:
+                    _id: '65a9266c146d2ae5d5fa44ba'
+                    email: 'evan@email.com'
+                    username: 'evan'
+                  createdDate: '2024-01-19T18:45:35.962Z'
+                  updatedDate: '2024-01-19T18:45:35.962Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Image
+  /image/{username}:
+    get:
+      tags:
+        - Image
+      summary: Gets a user profile image
+      parameters:
+        - $ref: '#/components/parameters/Username'
+      security: [] # no authentication
+      responses:
+        '200':
+          description: OK
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+  /image/post/{postId}:
+    get:
+      tags:
+        - Image
+      summary: Gets a post image
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      security: [] # no authentication
+      responses:
+        '200':
+          description: OK
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+    post:
+      tags:
+        - Image
+      summary: Upladads post image
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      description: This can only be done by an authenticated user.
+      operationId: uploadImage
+      requestBody:
+        $ref: '#/components/requestBodies/Image'
+      responses:
+        '200':
+          description: Returns success on upload
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'Image uploaded successfully.'
+  /image:
+    post:
+      tags:
+        - Image
+      summary: Upladads user profile
+      description: This can only be done by an authenticated user.
+      requestBody:
+        $ref: '#/components/requestBodies/Image'
+      responses:
+        '200':
+          description: Returns success on upload
+          content:
+            application/json:
+              schema:
+                example:
+                  code: 'SUCCESS'
+                  message: 'Image uploaded successfully.'
+
+components:
+  schemas:
+    SetCookie:
+      type: string
+      example: 'SESSION_ID=s%3AJ53kauJpFv4V52pMomP2RtYPmBOZ7f.OwqESkjSSoM6gWZ3DX5waqNvrHaow0bfCFx0qxwQ; Path=/; Expires=Thu, 22 Jun 2023 00:00:00 GMT; HttpOnly'
+
+  responses:
+    Unauthorized:
+      description: 'User is not authorized'
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                example: UNAUTHENTICATED
+              message:
+                type: string
+                example: User not authenticated
+
+  parameters:
+    Username:
+      name: username
+      in: path
+      description: User matching the specified username
+      required: true
+      schema:
+        type: string
+    PostId:
+      name: postId
+      in: path
+      description: Post matching the specified id
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+    Pagination:
+      required: false
+      description: Pagination parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - limit
+              - offset
+            properties:
+              limit:
+                type: integer
+                example: 10
+              offset:
+                type: integer
+                example: 0
+    Image:
+      required: true
+      description: Image parameters
+      content:
+        multipart/form-data: # Media type
+          schema: # Request payload
+            type: object
+            required:
+              - image
+            properties:
+              image: # (an image)
+                type: string
+                format: binary
+
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sid # cookie name
+
+# Apply cookie auth globally to all operations
+security:
+  - cookieAuth: []
