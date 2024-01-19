@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  api-server:
+    build:
+      context: .
+      args:
+        # reference in the Dockerfile using ARG
+        NODE_ENV: testing
+    restart: 'no'
+    command: yarn test --ci --watchAll=false --bail --forceExit
+    environment:
+      REDIS_DB_HOST: redis-db
+      MONGO_DB_HOST: mongo-db
+    depends_on:
+      redis:
+        condition: service_started
+      mongo:
+        condition: service_started
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    networks:
+      - back-tier
+
+volumes:
+  mongo-db:
+    name: cms-blog_mongo-db-test
+    external: false

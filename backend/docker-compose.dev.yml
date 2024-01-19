@@ -1,0 +1,59 @@
+version: "3"
+
+# environment variables stored in container
+x-environment-variables:
+  &api-environment
+  REDIS_DB_HOST: redis-db
+  MONGO_DB_HOST: mongo-db
+  NODE_ENV: development
+  # Session configurations from external env file
+  SESSION_ID: ${SESSION_ID}
+  SESSION_SECRET: ${SESSION_SECRET}
+  # Nginx configurations from external env file
+  NGINX_SERVER_PORT: ${NGINX_SERVER_PORT}
+
+services:
+  api-server-1:
+    &api-server
+    container_name: api-server-1
+    build:
+      context: ${PWD}/backend
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: development
+    volumes:
+      - ${PWD}/backend/healthchecks:/healthchecks:ro
+      - ${PWD}/backend/src:/backend/src:ro
+    healthcheck:
+      # run check by executing script as a module with the node command
+      test: "cat healthchecks/api/v1/server.js | node --input-type=module"
+      # check for 3 minis before considered unhealthy
+      interval: 10s
+      retries: 18
+    environment:
+      <<: *api-environment
+      SERVER_PORT: ${NGINX_SERVER_PORT_1}
+    depends_on:
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    # no port mapping to allow communication only through Nginx port
+    networks:
+      - back-tier
+    restart: unless-stopped
+  api-server-2:
+    <<: *api-server
+    container_name: api-server-2
+    environment:
+      <<: *api-environment
+      SERVER_PORT: ${NGINX_SERVER_PORT_2}
+    depends_on:
+      api-server-1:
+        condition: service_healthy
+
+volumes:
+  # external: true -> keeps volumes when destroyed using docker-compose down -v 
+  mongo-db:
+    name: cms-blog_mongo-db-dev
+    external: true
