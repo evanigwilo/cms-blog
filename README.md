@@ -9,6 +9,9 @@ Users can can store, manage, and serve various types of content (primarily text 
 
 This solution uses  `React.js` for the UI, `Styled-Components` for styling, `Node.js` runtime, `Express.js` for the API layer, with `Redis` for cache/session, `MongoDB` for data like images and posts, and `Nginx` as a reverse proxy.
 
+You can explore the [REST API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/evanigwilo/cms-blog/main/backend/docs/api-definition.yml)
+
+
 ## Architecture
 
 ### High-level architecture
